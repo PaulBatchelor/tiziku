@@ -1,5 +1,6 @@
 typedef struct {
     void *chuck;
+    float *stack;
 } the_chuckwrap;
 
 void chuckwrap_init(the_chuckwrap *cw, int sr, int bufsize, int in, int out);

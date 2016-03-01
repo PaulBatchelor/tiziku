@@ -9,6 +9,7 @@ extern "C" {
 
 TheChucK * TheChucK::ourInstance = NULL;
 
+static float global_stack[10];
 
 //------------------------------------------------------------------------------
 // name: initialize()
@@ -30,8 +31,12 @@ bool TheChucK::initialize( int srate, int bufferSize, int channelsIn,
         srate, bufferSize, channelsIn, channelsOut, argc, argv );
     
     // binding
-    //m_system->bind( ofck_query, "OF" );
-    
+    m_system->bind( tz_query, "Tiziku" );
+
+    for(int i = 0; i < 10; i++) {
+        global_stack[i] = 0;
+    }
+
     // done
     return val;
 }
@@ -196,12 +201,19 @@ TheChucK::~TheChucK()
 //}
 //
 
+
+float* TheChucK::getStack()
+{
+    return global_stack;
+}
+
 extern "C" {
 void chuckwrap_init(the_chuckwrap *cw, int sr, int bufsize, int in, int out)
 {
     cw->chuck = (TheChucK *) TheChucK::instance();
     TheChucK *chuck = (TheChucK *)cw->chuck;
     chuck->initialize(sr, bufsize, in, out, 0, NULL);
+    cw->stack = chuck->getStack();
 }
 
 void chuckwrap_compile(the_chuckwrap *cw, const char *filename)
@@ -215,4 +227,34 @@ void chuckwrap_compute(the_chuckwrap *cw, float *out, int bufsize)
     TheChucK *chuck = (TheChucK *)cw->chuck;
     chuck->onOutput(out, bufsize);
 }
+}
+
+CK_DLL_SFUN( cktz_foo )
+{
+    RETURN->v_int = 0;
+}
+
+CK_DLL_SFUN( cktz_set )
+{
+    t_CKINT pos = GET_CK_INT(ARGS);
+    t_CKFLOAT val = *((t_CKFLOAT *)ARGS + 1);
+    global_stack[pos] = (float) val;
+    RETURN->v_int = 0;
+}
+
+DLL_QUERY tz_query( Chuck_DL_Query * QUERY )
+{
+    Chuck_Env *env = Chuck_Env::instance();
+    QUERY->setname(QUERY, "Tiziku");
+
+    QUERY->begin_class(QUERY, "Tiziku", "Object");
+    QUERY->add_sfun(QUERY, cktz_foo, "int", "foo");
+
+    QUERY->add_sfun(QUERY, cktz_set, "int", "set");
+    QUERY->add_arg(QUERY, "int", "pos");
+    QUERY->add_arg(QUERY, "float", "val");
+
+    QUERY->end_class(QUERY);
+    
+    return TRUE;
 }

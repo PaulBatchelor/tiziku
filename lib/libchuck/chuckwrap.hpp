@@ -26,7 +26,9 @@ class Chuck_System;
 class Chuck_VM;
 class Chuck_Compiler;
 
+// Paul's hack
 
+DLL_QUERY tz_query( Chuck_DL_Query * QUERY );
 
 
 //------------------------------------------------------------------------------
@@ -71,6 +73,9 @@ public:
     
     // singletone instance
     static TheChucK * ourInstance;
+
+public:
+    float* getStack();
 
 protected:
     // chuck system stuff
