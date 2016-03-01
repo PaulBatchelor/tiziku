@@ -1,13 +1,21 @@
+//class dummy {
+//    fun void set(int x, float y) {
+//
+//    }
+//}
+//
+//dummy Tiziku;
+
 Sporth s => dac;
 
 s.parse(
 "1 p 0.5 2 thresh 0.01 0.1 0.4 tenv " +
 "0 p mtof 0.5 1 1 1 fm * " +
-"dup 0.7 1.5 delay 0.9 * 1000 butlp + " +
+"dup 0.7 1.5 delay 0.6 * 1000 butlp + " +
 "dup dup 0.97 10000 revsc drop 0.4 * +"
 );
 
-[0, 2, 7, 11, 14] @=> int scale[];
+[0, 2, 3, 5, 7, 10] @=> int scale[];
 
 fun int tick(int val)
 {

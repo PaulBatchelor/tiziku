@@ -39,7 +39,8 @@ static float my_rad = 0;
 
 static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 {
-    my_rad = fmod(my_rad + 0.0001, 2 * M_PI);
+    //my_rad = fmod(my_rad + 0.0001, 2 * M_PI);
+    my_rad = fmod(my_rad + 0.001, 2 * M_PI);
     double mx, my, t, dt;
     int winWidth, winHeight;
     int fbWidth, fbHeight;
@@ -103,6 +104,7 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
     nvgEndFrame(vg);
     glfwSwapBuffers(window);
     glfwPollEvents();
+    usleep(5000);
 }
 
 int main()
