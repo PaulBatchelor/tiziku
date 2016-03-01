@@ -1,17 +1,20 @@
 .PHONY: ex
 
+NCHAN=2
 
 CXXFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=1024 \
-		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=1 -D__PLATFORM_LINUX__ -g 
+		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g 
 
 CFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=1024 \
-		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=1 -D__PLATFORM_LINUX__ -g 
+		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g \
+		   -I lib/nanovg
 
-LDFLAGS=-lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++
+LDFLAGS=-lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++ -lGL -lglfw
 
 CHUCK_OBJ=`find lib/chuck/ -name "*.o" | egrep -v "libchuck|chuck_main"`
 
-OBJ = lib/libchuck/chuckwrap.o lib/nanovg/nanovg.o
+#OBJ = graphics.o lib/libchuck/chuckwrap.o lib/nanovg/nanovg.o audio.o 
+OBJ = lib/libchuck/chuckwrap.o lib/nanovg/nanovg.o audio.o graphics.o
 
 default: tiziku
 
@@ -22,7 +25,7 @@ default: tiziku
 	gcc -c $(CFLAGS) $< -o $@
 
 tiziku: main.c $(OBJ)
-	gcc -o $@ $(LDFLAGS) $(CXXFLAGS) main.c $(OBJ) $(CHUCK_OBJ)
+	gcc -o $@ $(LDFLAGS) $(CFLAGS) main.c $(OBJ) $(CHUCK_OBJ)
 
 hello: hello.c lib/nanovg/nanovg.o
 	gcc -I lib/nanovg hello.c -lm -lGL -lglfw lib/nanovg/nanovg.o -o $@

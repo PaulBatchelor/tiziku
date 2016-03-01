@@ -1,12 +1,10 @@
-#include <stdio.h>
-#include <GLFW/glfw3.h>
-#include "nanovg.h"
+#include <math.h>
+
+#include "graphics.h"
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
 
-double g_time = 0;
-
-void errorcb(int error, const char* desc)
+static void errorcb(int error, const char* desc)
 {
 	printf("GLFW error %d: %s\n", error, desc);
 }
@@ -19,17 +17,20 @@ static void key(GLFWwindow* window, int key, int scancode, int action, int mods)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-int main()
+void tz_run_graphics(tz_graphics *gfx)
 {
-    GLFWwindow *window;
-    NVGcontext *vg = NULL;
+    GLFWwindow *window = gfx->window;
+    gfx->vg = NULL;
+    float *g_time = &gfx->g_time;
+
+    *g_time = 0;
+
 
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
-		return -1;
+		exit(-1);
 	}
 
-	
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
@@ -37,18 +38,27 @@ int main()
 
 	if (!window) {
 		glfwTerminate();
-		return -1;
+		exit(-1);
 	}
 
 	glfwSetKeyCallback(window, key);
 	glfwSetErrorCallback(errorcb);
 	glfwMakeContextCurrent(window);
 
-	vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+#ifdef NANOVG_GLEW
+    if(glewInit() != GLEW_OK) {
+		printf("Could not init glew.\n");
+		exit(-1);
+	}
+#endif
+
+	gfx->vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+    
+    NVGcontext *vg = gfx->vg;
 
 	if (vg == NULL) {
 		printf("Could not init nanovg.\n");
-		return -1;
+		exit(-1);
 	}
 
 	glfwSwapInterval(0);
@@ -56,13 +66,13 @@ int main()
 
 
     NVGcolor bgcolor =  nvgRGBAf(252, 251, 227, 255);
+
     while(!glfwWindowShouldClose(window)){
 		double mx, my, t, dt;
 		int winWidth, winHeight;
 		int fbWidth, fbHeight;
 		float pxRatio;
         int x, y;
-        double rad = 0.1 * (g_time * (2 * M_PI / 1200));
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
 		glfwGetCursorPos(window, &mx, &my);
@@ -74,31 +84,22 @@ int main()
 
 		nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
 			glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
-        for(y = 0; y < 16; y++) {
-            for(x = 0; x < 16; x++)  {
-                double scale = 0.5 * (sin(rad + 5 * x + 2 * y) + 1);
                 nvgBeginPath(vg);
-                nvgArc(vg, 20 + 40 + x * 60 + 40 * scale, 20 + 40 + y * 60 + 40 * scale, 40 * scale, 0, 2 * M_PI, NVG_CCW);
+                nvgArc(vg, fbWidth/2, fbHeight/2, 40, 0, 2 * M_PI, NVG_CCW);
                 nvgClosePath(vg);
-                if(x % 2== 0) {
-                    nvgFillColor(vg, nvgRGBA(22 * scale, 147 * scale, 165 * scale, 255 * scale));
-                } else {
-                    nvgFillColor(vg, nvgRGBA(255 * scale, 64 * scale, 64 * scale, 255 * scale));
-
-                }
+                nvgFillColor(vg, nvgRGBA(22, 147, 165, 255));
                 nvgFill(vg);
-            }
-        }
 
         nvgEndFrame(vg);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-        g_time++;
     }
 
-	nvgDeleteGL2(vg);
-
-	glfwTerminate();
-
-    return 0;
 }
+
+void tz_stop_graphics(tz_graphics *gfx)
+{
+	nvgDeleteGL2(gfx->vg);
+	glfwTerminate();
+}
+

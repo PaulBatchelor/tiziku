@@ -6,5 +6,5 @@
 
 Sporth s => dac;
 
-s.parse("440 0.1 sine");
-1::second => now;
+s.parse("200 880 20 randh 0.5 sine");
+10::second => now;
