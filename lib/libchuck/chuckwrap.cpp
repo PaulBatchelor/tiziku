@@ -178,6 +178,7 @@ TheChucK::TheChucK()
 TheChucK::~TheChucK()
 {
     // done
+    m_system->clientShutdown();
     delete m_system;
     // zero out
     printf("destroying...\n");
@@ -227,6 +228,13 @@ void chuckwrap_compute(the_chuckwrap *cw, float *out, int bufsize)
     TheChucK *chuck = (TheChucK *)cw->chuck;
     chuck->onOutput(out, bufsize);
 }
+
+void chuckwrap_destroy(the_chuckwrap *cw)
+{
+    TheChucK *chuck = (TheChucK *)cw->chuck;
+    delete chuck;
+}
+
 }
 
 CK_DLL_SFUN( cktz_foo )

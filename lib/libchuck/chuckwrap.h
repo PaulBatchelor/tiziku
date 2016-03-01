@@ -6,3 +6,4 @@ typedef struct {
 void chuckwrap_init(the_chuckwrap *cw, int sr, int bufsize, int in, int out);
 void chuckwrap_compile(the_chuckwrap *cw, const char *filename);
 void chuckwrap_compute(the_chuckwrap *cw, float *out, int bufsize);
+void chuckwrap_destroy(the_chuckwrap *cw);

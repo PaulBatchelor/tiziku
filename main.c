@@ -34,23 +34,30 @@ static int jack_cb(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
+static float scale_prev = 0.0;
+static float my_rad = 0;
+
 static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 {
+    my_rad = fmod(my_rad + 0.0001, 2 * M_PI);
     double mx, my, t, dt;
     int winWidth, winHeight;
     int fbWidth, fbHeight;
     float pxRatio;
     int x, y;
+    float maxRad = 200;
 
     tz_world *world = ud;
 
     the_chuckwrap *cw = &world->cw;
 
-    float scale = cw->stack[0];
+    float scale = 0.005 * cw->stack[0] + 0.995 * scale_prev;
+
+    scale_prev = scale;
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-    NVGcolor bgcolor =  nvgRGBAf(252, 251, 227, 255);
+    NVGcolor bgcolor =  nvgRGBAf(239, 250, 180, 255);
     glfwGetCursorPos(window, &mx, &my);
     glfwGetWindowSize(window, &winWidth, &winHeight);
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
@@ -60,10 +67,37 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 
     nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
     glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
+
     nvgBeginPath(vg);
-    nvgArc(vg, fbWidth/2, fbHeight/2, 200 * scale, 0, 2 * M_PI, NVG_CCW);
-    nvgClosePath(vg);
-    nvgFillColor(vg, nvgRGBA(22, 147, 165, 255));
+    nvgArc(vg, 
+        ((fbWidth - maxRad * sin(my_rad))/2), 
+        (fbHeight /2) ,     
+        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
+    nvgFill(vg);
+    
+    nvgBeginPath(vg);
+    nvgArc(vg, 
+        (fbWidth + maxRad * sin(my_rad))/2, 
+        fbHeight/2,     
+        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
+    nvgFill(vg);
+    
+    nvgBeginPath(vg);
+    nvgArc(vg, 
+        fbWidth/2, 
+        (fbHeight - maxRad * sin(my_rad))/2,     
+        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
+    nvgFill(vg);
+    
+    nvgBeginPath(vg);
+    nvgArc(vg, 
+        fbWidth/2, 
+        (fbHeight + maxRad * sin(my_rad))/2,     
+        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
     nvgFill(vg);
 
     nvgEndFrame(vg);
@@ -81,6 +115,7 @@ int main()
     tz_run_graphics(&world.graphics, draw, &world);
     tz_stop_graphics(&world.graphics);
     tz_stop_audio(&world.audio);
+    chuckwrap_destroy(cw);
     return 0;
 }
 
