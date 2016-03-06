@@ -4,10 +4,16 @@
 #include <jack/jack.h>
 #include <math.h>
 
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
 #include "chuckwrap.h"
 #include "audio.h"
 #include "graphics.h"
 #include "world.h"
+
+static tz_world *g_tz;
 
 static int jack_cb(jack_nframes_t nframes, void *arg)
 {
@@ -52,6 +58,8 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 
     the_chuckwrap *cw = &world->cw;
 
+    lua_State *L = world->L;
+
     float scale = 0.005 * cw->stack[0] + 0.995 * scale_prev;
 
     scale_prev = scale;
@@ -67,49 +75,87 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
     glViewport(0, 0, fbWidth, fbHeight);
 
     nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
-    glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
+    //glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
 
-    nvgBeginPath(vg);
-    nvgArc(vg, 
-        ((fbWidth - maxRad * sin(my_rad))/2), 
-        (fbHeight /2) ,     
-        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
-    nvgFill(vg);
-    
-    nvgBeginPath(vg);
-    nvgArc(vg, 
-        (fbWidth + maxRad * sin(my_rad))/2, 
-        fbHeight/2,     
-        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
-    nvgFill(vg);
-    
-    nvgBeginPath(vg);
-    nvgArc(vg, 
-        fbWidth/2, 
-        (fbHeight - maxRad * sin(my_rad))/2,     
-        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
-    nvgFill(vg);
-    
-    nvgBeginPath(vg);
-    nvgArc(vg, 
-        fbWidth/2, 
-        (fbHeight + maxRad * sin(my_rad))/2,     
-        maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
-    nvgFill(vg);
+    //nvgBeginPath(vg);
+    //nvgArc(vg, 
+    //    ((fbWidth - maxRad * sin(my_rad))/2), 
+    //    (fbHeight /2) ,     
+    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    //nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
+    //nvgFill(vg);
+    //
+    //nvgBeginPath(vg);
+    //nvgArc(vg, 
+    //    (fbWidth + maxRad * sin(my_rad))/2, 
+    //    fbHeight/2,     
+    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    //nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
+    //nvgFill(vg);
+    //
+    //nvgBeginPath(vg);
+    //nvgArc(vg, 
+    //    fbWidth/2, 
+    //    (fbHeight - maxRad * sin(my_rad))/2,     
+    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    //nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
+    //nvgFill(vg);
+    //
+    //nvgBeginPath(vg);
+    //nvgArc(vg, 
+    //    fbWidth/2, 
+    //    (fbHeight + maxRad * sin(my_rad))/2,     
+    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
+    //nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
+    //nvgFill(vg);
+
+    lua_getglobal(L, "run");
+    lua_pcall(L, 0, 0, 0);
 
     nvgEndFrame(vg);
     glfwSwapBuffers(window);
     glfwPollEvents();
-    usleep(5000);
+    usleep(8000);
+}
+
+static int testfunc(lua_State *L)
+{
+    int pos_x = lua_tonumber(L, 1);
+    int pos_y = lua_tonumber(L, 2);
+    float rad = lua_tonumber(L, 3);
+
+    NVGcontext *vg = g_tz->graphics.vg;
+    nvgBeginPath(vg);
+    nvgArc(vg, pos_x, pos_y, rad, 0, 2 * M_PI, NVG_CCW);
+    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
+    nvgFill(vg);
+    return 0;
 }
 
 int main()
 {
     tz_world world;
+
+    g_tz = &world;
+    world.L = luaL_newstate();
+    lua_State *L = world.L;
+
+    /* for the io library */
+    luaL_requiref(L, "io", luaopen_io, 1);
+    /* for the string library */
+    luaL_requiref(L, "string", luaopen_string, 1);
+    /* for the math  library */
+    luaL_requiref(L, "math", luaopen_math, 1);
+
+    luaopen_base(L);
+    luaopen_string(L);
+    luaopen_math(L);
+
+    lua_register(L, "test", testfunc);
+
+    if(luaL_loadfile(L, "run.lua") || lua_pcall(L, 0, 0, 0))
+        error(L, "cannot run file %s", lua_tostring(L, -1));
+
     the_chuckwrap *cw = &world.cw;
     chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
     chuckwrap_compile(cw, "test.ck");
@@ -118,6 +164,8 @@ int main()
     tz_stop_graphics(&world.graphics);
     tz_stop_audio(&world.audio);
     chuckwrap_destroy(cw);
+
+    lua_close(L);
     return 0;
 }
 

@@ -10,7 +10,7 @@ CFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=$(BUFSI
 		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g \
 		   -I lib/nanovg -O3
 
-LDFLAGS=-lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++ -lGL -lglfw
+LDFLAGS=-llua -lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++ -lGL -lglfw
 
 CHUCK_OBJ=`find lib/chuck/ -name "*.o" | egrep -v "libchuck|chuck_main"`
 
@@ -26,7 +26,7 @@ default: tiziku
 	gcc -c $(CFLAGS) $< -o $@
 
 tiziku: main.c $(OBJ)
-	gcc -o $@ $(LDFLAGS) $(CFLAGS) main.c $(OBJ) $(CHUCK_OBJ)
+	gcc main.c -o $@ $(LDFLAGS) $(CFLAGS) $(OBJ) $(CHUCK_OBJ)
 
 hello: hello.c lib/nanovg/nanovg.o
 	gcc -I lib/nanovg hello.c -lm -lGL -lglfw lib/nanovg/nanovg.o -o $@

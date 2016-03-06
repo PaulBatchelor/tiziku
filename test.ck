@@ -15,6 +15,8 @@ s.parse(
 "dup dup 0.97 10000 revsc drop 0.4 * +"
 );
 
+//s.parsefile("monk.sp");
+
 [0, 2, 3, 5, 7, 10] @=> int scale[];
 
 fun int tick(int val)
