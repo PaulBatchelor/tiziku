@@ -1,22 +1,22 @@
-Sporth s => dac.left;
+Sporth s => dac;
 Impulse imp[4] => LPF filt[4];
 
-filt[0] => dac;
+filt[0] => dac.left;
 filt[0].freq(1000);
 filt[0].gain(0.4);
 filt[0].Q(10);
 
-filt[1] => dac;
+filt[1] => dac.left;
 filt[1].freq(4000);
 filt[1].gain(0.4);
 filt[1].Q(10);
 
-filt[2] => dac;
+filt[2] => dac.right;
 filt[2].freq(800);
 filt[3].gain(0.8);
 filt[2].Q(20);
 
-filt[3] => dac;
+filt[3] => dac.right;
 filt[3].freq(600);
 filt[3].gain(0.9);
 filt[3].Q(40);
@@ -24,7 +24,7 @@ filt[3].Q(40);
 s.parse(
 "'orch' 'orch.wav' loadfile " + 
 "'scl' '12 7 4 11 7 4 2' gen_vals " + 
-"55 '+2(++)+++----' prop 0.8 maytrig tick + dup 0.02 0.1 1.3 tenv " +
+"50 '+2(++)+++----' prop 0.8 maytrig tick + dup 0.02 0.1 1.3 tenv " +
 "swap 0 'scl' tseq 45 + mtof 0.001 port 0.3 1 1.002 1.3 fm * " +
 "0 'orch' tbldur 7 randi 0.3 1 sine 0 'orch' tbldur biscale 0 1 0.05 randi cf 0 0.05 0.2 randi 4 'orch' mincer 1000 butlp + " +
 " 1 p 0.5 2 thresh 0.9 0.3 0.9 tenv 0 0.2 3000 randh * 500 butlp + " +

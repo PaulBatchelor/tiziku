@@ -4,10 +4,10 @@ NCHAN=2
 BUFSIZE=512
 
 CXXFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=$(BUFSIZE) \
-		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g  -O3
+		   -DMY_CHANNELS_IN=$(NCHAN) -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g  -O3
 
 CFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=$(BUFSIZE)  \
-		   -DMY_CHANNELS_IN=1 -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g \
+		   -DMY_CHANNELS_IN=$(NCHAN) -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g \
 		   -I lib/nanovg -O3
 
 LDFLAGS=-llua -lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++ -lGL -lglfw

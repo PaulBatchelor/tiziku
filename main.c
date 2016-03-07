@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <jack/jack.h>
 #include <math.h>
+#include <string.h>
 
 #include <lua.h>
 #include <lualib.h>
@@ -34,7 +35,7 @@ static int jack_cb(jack_nframes_t nframes, void *arg)
     chuckwrap_compute(&world->cw, buf, nframes);
     for(i = 0; i < nframes; i++) {
         out[0][i] = buf[bufcount++];
-        out[1][i] = out[0][i];
+        out[1][i] = buf[bufcount++];
     }
 
     return 0;
@@ -182,8 +183,7 @@ int main()
         error(L, "cannot run file %s", lua_tostring(L, -1));
 
     the_chuckwrap *cw = &world.cw;
-    //chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
-    chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, 2);
+    chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
     chuckwrap_compile(cw, "run.ck");
     tz_run_audio(&world.audio, &world, jack_cb);
     tz_run_graphics(&world.graphics, draw, &world);
