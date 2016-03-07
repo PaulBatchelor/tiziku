@@ -21,20 +21,20 @@ static int jack_cb(jack_nframes_t nframes, void *arg)
     tz_world *world = arg;
     tz_audio *audio = &world->audio;
     jack_default_audio_sample_t  *out[audio->nchan];
-    int bufcount = 0; 
 
-    float buf[nframes * audio->nchan];
-    
-    chuckwrap_compute(&world->cw, buf, nframes * audio->nchan);
+    float buf[nframes * 2];
+    memset(buf, 0, sizeof(float) * nframes * 2); 
+
 
     for(chan = 0; chan < audio->nchan; chan++) {
         out[chan] = jack_port_get_buffer (audio->output_port[chan], nframes);
     }
+
+    int bufcount = 0; 
+    chuckwrap_compute(&world->cw, buf, nframes);
     for(i = 0; i < nframes; i++) {
-        for(chan = 0; chan < audio->nchan; chan++) {
-            out[chan][i] = buf[bufcount++];
-            //out[chan][i] = 0;
-        }
+        out[0][i] = buf[bufcount++];
+        out[1][i] = out[0][i];
     }
 
     return 0;
@@ -79,7 +79,7 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
     lua_pcall(L, 0, 0, 0);
 
     nvgEndFrame(vg);
-    usleep(4000);
+    usleep(8000);
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
@@ -182,12 +182,13 @@ int main()
         error(L, "cannot run file %s", lua_tostring(L, -1));
 
     the_chuckwrap *cw = &world.cw;
-    chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
+    //chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
+    chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, 2);
     chuckwrap_compile(cw, "run.ck");
     tz_run_audio(&world.audio, &world, jack_cb);
     tz_run_graphics(&world.graphics, draw, &world);
-    tz_stop_graphics(&world.graphics);
     tz_stop_audio(&world.audio);
+    tz_stop_graphics(&world.graphics);
     chuckwrap_destroy(cw);
 
     lua_close(L);

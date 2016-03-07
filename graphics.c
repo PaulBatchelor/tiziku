@@ -47,6 +47,7 @@ void tz_run_graphics(
 	glfwSetKeyCallback(window, key);
 	glfwSetErrorCallback(errorcb);
 	glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	gfx->vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
     
