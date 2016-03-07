@@ -1,3 +1,5 @@
+This is a work in progres...
+
 # Tiziku
 
 ![tiziku](shot.png)
