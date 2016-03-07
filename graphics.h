@@ -8,6 +8,7 @@ typedef struct {
     GLFWwindow *window;
     NVGcontext *vg;
     float g_time;
+    float rgb[4];
 } tz_graphics;
 
 void tz_run_graphics(tz_graphics *gfx, void (*draw)(NVGcontext*,GLFWwindow*,void*), void *ud);

@@ -56,13 +56,7 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 
     tz_world *world = ud;
 
-    the_chuckwrap *cw = &world->cw;
-
     lua_State *L = world->L;
-
-    float scale = 0.005 * cw->stack[0] + 0.995 * scale_prev;
-
-    scale_prev = scale;
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
@@ -75,47 +69,19 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
     glViewport(0, 0, fbWidth, fbHeight);
 
     nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
-    //glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
 
-    //nvgBeginPath(vg);
-    //nvgArc(vg, 
-    //    ((fbWidth - maxRad * sin(my_rad))/2), 
-    //    (fbHeight /2) ,     
-    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    //nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
-    //nvgFill(vg);
-    //
-    //nvgBeginPath(vg);
-    //nvgArc(vg, 
-    //    (fbWidth + maxRad * sin(my_rad))/2, 
-    //    fbHeight/2,     
-    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    //nvgFillColor(vg, nvgRGBA(22, 147, 165, 128));
-    //nvgFill(vg);
-    //
-    //nvgBeginPath(vg);
-    //nvgArc(vg, 
-    //    fbWidth/2, 
-    //    (fbHeight - maxRad * sin(my_rad))/2,     
-    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    //nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
-    //nvgFill(vg);
-    //
-    //nvgBeginPath(vg);
-    //nvgArc(vg, 
-    //    fbWidth/2, 
-    //    (fbHeight + maxRad * sin(my_rad))/2,     
-    //    maxRad * scale, 0, 2 * M_PI, NVG_CCW);
-    //nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
-    //nvgFill(vg);
+    lua_pushnumber(L, winWidth);
+    lua_setglobal(L, "width");
+    lua_pushnumber(L, winHeight);
+    lua_setglobal(L, "height");
 
     lua_getglobal(L, "run");
     lua_pcall(L, 0, 0, 0);
 
     nvgEndFrame(vg);
+    usleep(4000);
     glfwSwapBuffers(window);
     glfwPollEvents();
-    usleep(8000);
 }
 
 static int testfunc(lua_State *L)
@@ -132,6 +98,59 @@ static int testfunc(lua_State *L)
     return 0;
 }
 
+static int rect(lua_State *L)
+{
+    float x1 = lua_tonumber(L, 1);
+    float y1 = lua_tonumber(L, 2);
+    float x2 = lua_tonumber(L, 3);
+    float y2 = lua_tonumber(L, 4);
+
+    NVGcontext *vg = g_tz->graphics.vg;
+    float *rgb = g_tz->graphics.rgb;
+    unsigned char r = rgb[0];
+    unsigned char g = rgb[1];
+    unsigned char b = rgb[2];
+    unsigned char a = rgb[3];
+
+    nvgBeginPath(vg);
+    nvgRect(vg, x1, y1, x2, y2);
+    nvgFillColor(vg, nvgRGBA(r, g, b, a));
+    nvgFill(vg);
+
+    return 0;
+}
+
+static int setrgba(lua_State *L)
+{
+    float r = lua_tonumber(L, 1);
+    float g = lua_tonumber(L, 2);
+    float b = lua_tonumber(L, 3);
+    float a = lua_tonumber(L, 4);
+
+    float *rgb = g_tz->graphics.rgb;
+
+    rgb[0] = r;
+    rgb[1] = g;
+    rgb[2] = b;
+    rgb[3] = a;
+
+    return 0;
+}
+
+static int get_chan(lua_State *L)
+{
+    int pos = lua_tonumber(L, 1);
+    float *stack = g_tz->cw.stack;
+    lua_pushnumber(L, stack[pos]);
+    return 1;
+}
+
+static int my_rand(lua_State *L)
+{
+    lua_pushnumber(L, rand());
+    return 1;
+}
+
 int main()
 {
     tz_world world;
@@ -146,19 +165,25 @@ int main()
     luaL_requiref(L, "string", luaopen_string, 1);
     /* for the math  library */
     luaL_requiref(L, "math", luaopen_math, 1);
+    /* for the os library */
+    luaL_requiref(L, "os", luaopen_os, 1);
 
     luaopen_base(L);
     luaopen_string(L);
     luaopen_math(L);
 
     lua_register(L, "test", testfunc);
+    lua_register(L, "rect", rect);
+    lua_register(L, "rgba", setrgba);
+    lua_register(L, "get_chan", get_chan);
+    lua_register(L, "rand", my_rand);
 
     if(luaL_loadfile(L, "run.lua") || lua_pcall(L, 0, 0, 0))
         error(L, "cannot run file %s", lua_tostring(L, -1));
 
     the_chuckwrap *cw = &world.cw;
     chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
-    chuckwrap_compile(cw, "test.ck");
+    chuckwrap_compile(cw, "run.ck");
     tz_run_audio(&world.audio, &world, jack_cb);
     tz_run_graphics(&world.graphics, draw, &world);
     tz_stop_graphics(&world.graphics);
