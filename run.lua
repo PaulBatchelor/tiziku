@@ -1,4 +1,3 @@
---require "dummy"
 math.randomseed(os.time())
 blink = 0
 

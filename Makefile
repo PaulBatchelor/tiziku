@@ -28,8 +28,5 @@ default: tiziku
 tiziku: main.c $(OBJ)
 	gcc main.c -o $@ $(LDFLAGS) $(CFLAGS) $(OBJ) $(CHUCK_OBJ)
 
-hello: hello.c lib/nanovg/nanovg.o
-	gcc -I lib/nanovg hello.c -lm -lGL -lglfw lib/nanovg/nanovg.o -o $@
-
 clean:
 	rm -rf $(OBJ) tiziku hello
