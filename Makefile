@@ -8,7 +8,7 @@ CXXFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=$(BUF
 
 CFLAGS = -I lib/chuck/ -I lib/libchuck/ -DMY_SRATE=44100 -DMY_BUFFERSIZE=$(BUFSIZE)  \
 		   -DMY_CHANNELS_IN=$(NCHAN) -DMY_CHANNELS_OUT=$(NCHAN) -D__PLATFORM_LINUX__ -g \
-		   -I lib/nanovg -O3
+		   -I lib/nanovg -O3 -Wall
 
 LDFLAGS=-llua -lpthread -lasound -ldl -lm -ljack -lsndfile -lstdc++ -lGL -lglfw
 
