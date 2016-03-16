@@ -175,7 +175,7 @@ int main()
     lua_register(L, "rand", my_rand);
 
     if(luaL_loadfile(L, "run.lua") || lua_pcall(L, 0, 0, 0))
-        error(L, "cannot run file %s", lua_tostring(L, -1));
+        fprintf(stderr, "cannot run file %s", lua_tostring(L, -1));
 
     the_chuckwrap *cw = &world.cw;
     chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
