@@ -45,6 +45,13 @@ function Square:newcolor(clr)
     self.clr[4] = clr[4]
 end
 
+function Square:black()
+    self.clr[1] = 0
+    self.clr[2] = 0
+    self.clr[3] = 0
+    self.clr[4] = 255
+end
+
 function Square:initcolor(clr)
     self.clr = {0, 0, 0, 255}
     self.pclr = {0, 0, 0, 255}
@@ -103,7 +110,7 @@ for i = 1, nsquares do
     s[i] = Square:new()
     s[i]:initcolor({0, 0, 0})
     color = math.random(4)
-    s[i]:newcolor(colors[color])
+    --s[i]:newcolor(colors[color])
     if i == 1 then 
         s[i].pos = 0
         s[i].ppos = 0
@@ -116,14 +123,21 @@ for i = 1, nsquares do
 end
 
 clock = 0
+pfade = -1
 function run()
     trig = get_chan(0)
     cpos = 0
     scale = 0
+    fade = get_chan(6)
 
     if(trig ~= prev and prev ~= -1) then
         prop = math.random(nsizes)
         scale = getscale(sizes[prop])
+    end
+
+    if(fade ~= pfade and pfade ~= -1) then
+        print("FADE TO BLACK")
+        for i = 1, nsquares do s[i]:black() end
     end
 
     clock = (clock + 1) % 3
@@ -148,4 +162,5 @@ function run()
         
     end
     prev = trig
+    pfade = fade
 end
