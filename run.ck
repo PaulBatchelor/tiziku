@@ -28,9 +28,9 @@ s.parse(
 "'orch' 'orch.wav' loadfile " + 
 "'scl' '12 7 4 11 7 4 2' gen_vals " + 
 "50 '+2(++)+++----' prop 0.8 maytrig tick + dup 0.02 0.1 1.3 tenv " +
-"swap 0 'scl' tseq 45 + mtof 0.001 port 0.3 1 1.002 1.3 fm * " +
+"swap 0 'scl' tseq 45 + mtof 0.001 port 0.3 1 1.002 1.1 fm * 100 buthp " +
 // key Fades
-"tick 0.001 40 1 expon * " + 
+"tick 0.001 30 1 expon * " + 
 "dup 0.5 * 4 p + 4 pset " +
 "0 'orch' tbldur 7 randi 0.3 1 sine 0 'orch' tbldur biscale 0 1 0.05 randi cf 0 0.05 0.2 randi 4 'orch' mincer 1000 butlp " +
 "dup 0.5 * 4 p + 4 pset + " +
@@ -123,6 +123,14 @@ if( !min.open(device)) me.exit();
 
 0 => int chan;
 
+fun void change_scale(int scale[]) {
+    0 => float val;
+    for(0 => int i; i < 7; i++) {
+        scale[i] => val;
+        s.tset(i, scale[i], "scl");
+    }
+}
+
 fun void run() {
     while(is_running) {
         min => now;
@@ -144,6 +152,15 @@ fun void run() {
                     Tiziku.set(6, fade_out);
                     s.pset(3, fade_out);
                     <<< "FADE", fade_out>>>;
+                } else if (chan == 8) {
+                    <<< "CHANGING SCALE...">>>;
+                    change_scale([12, 7, 4, 11, 7, 4, 2]);
+                } else if(chan == 9) {
+                    <<< "CHANGING SCALE...">>>;
+                    change_scale([16, 14, 7, 12, 11, 7, 9]);
+                } else if(chan == 10) {
+                    <<< "CHANGING SCALE...">>>;
+                    change_scale([19, 14, 12, 17, 16, 11, 12]);
                 }
 
             }
