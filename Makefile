@@ -30,6 +30,9 @@ OBJS += $(addprefix $(LUA_PATH)/, $(BASE_O))
 CFLAGS+=-DLUA_USE_C89 -DLUA_COMPAT_5_2
 CFLAGS+=-I$(LUA_PATH)
 
+OBJS += lib/patchwerk/patchwerk.o
+CFLAGS += -Ilib/patchwerk
+
 default: tiziku
 
 %.o: %.cpp
