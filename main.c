@@ -10,38 +10,39 @@
 #include <lauxlib.h>
 
 #include "chuckwrap.h"
+#include "patchwerk.h"
 #include "audio.h"
 #include "graphics.h"
 #include "world.h"
 
 static tz_world *g_tz;
 
-static int jack_cb(jack_nframes_t nframes, void *arg)
-{
-    /* int i, chan; */
-    /* tz_world *world = arg; */
-    /* tz_audio *audio = &world->audio; */
-    /* jack_default_audio_sample_t  *out[audio->nchan]; */
+/* static int jack_cb(jack_nframes_t nframes, void *arg) */
+/* { */
+/*     /\* int i, chan; *\/ */
+/*     /\* tz_world *world = arg; *\/ */
+/*     /\* tz_audio *audio = &world->audio; *\/ */
+/*     /\* jack_default_audio_sample_t  *out[audio->nchan]; *\/ */
 
-    /* float buf[nframes * 2]; */
-    /* memset(buf, 0, sizeof(float) * nframes * 2);  */
+/*     /\* float buf[nframes * 2]; *\/ */
+/*     /\* memset(buf, 0, sizeof(float) * nframes * 2);  *\/ */
 
 
-    /* for(chan = 0; chan < audio->nchan; chan++) { */
-    /*     out[chan] = jack_port_get_buffer (audio->output_port[chan], nframes); */
-    /* } */
+/*     /\* for(chan = 0; chan < audio->nchan; chan++) { *\/ */
+/*     /\*     out[chan] = jack_port_get_buffer (audio->output_port[chan], nframes); *\/ */
+/*     /\* } *\/ */
 
-    /* int bufcount = 0; */
-    /* chuckwrap_compute(&world->cw, buf, nframes); */
-    /* for(i = 0; i < nframes; i++) { */
-    /*     /\* out[0][i] = buf[bufcount++]; *\/ */
-    /*     /\* out[1][i] = buf[bufcount++]; *\/ */
-    /*     out[0][i] = 0; */
-    /*     out[1][i] = 0; */
-    /* } */
+/*     /\* int bufcount = 0; *\/ */
+/*     /\* chuckwrap_compute(&world->cw, buf, nframes); *\/ */
+/*     /\* for(i = 0; i < nframes; i++) { *\/ */
+/*     /\*     /\\* out[0][i] = buf[bufcount++]; *\\/ *\/ */
+/*     /\*     /\\* out[1][i] = buf[bufcount++]; *\\/ *\/ */
+/*     /\*     out[0][i] = 0; *\/ */
+/*     /\*     out[1][i] = 0; *\/ */
+/*     /\* } *\/ */
 
-    return 0;
-}
+/*     return 0; */
+/* } */
 
 static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 {
@@ -152,6 +153,7 @@ static int my_rand(lua_State *L)
 int main()
 {
     tz_world world;
+    long i;
 
     g_tz = &world;
     world.L = luaL_newstate();
@@ -182,11 +184,20 @@ int main()
     /* the_chuckwrap *cw = &world.cw; */
     /* chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT); */
     /* chuckwrap_compile(cw, "run.ck"); */
-    tz_run_audio(&world.audio, &world, jack_cb);
-    tz_run_graphics(&world.graphics, draw, &world);
-    tz_stop_audio(&world.audio);
-    tz_stop_graphics(&world.graphics);
+
+    tz_pw_init(&world.audio);
+    /* tz_run_audio(&world.audio, &world, jack_cb); */
+    /* tz_run_graphics(&world.graphics, draw, &world); */
+    /* tz_stop_audio(&world.audio); */
+    /* tz_stop_graphics(&world.graphics); */
     /* chuckwrap_destroy(cw); */
+    tz_pw_mkpatch(&world.audio);
+
+    for(i = 0; i < 44100 * 10; i++) {
+        pw_patch_tick(world.audio.patch);
+    }
+
+    tz_pw_del(&world.audio);
 
     lua_close(L);
     return 0;

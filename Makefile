@@ -33,6 +33,12 @@ CFLAGS+=-I$(LUA_PATH)
 OBJS += lib/patchwerk/patchwerk.o
 CFLAGS += -Ilib/patchwerk
 
+LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile
+
+OBJS += wavout.o
+
+OBJS += pwsporth.o
+
 default: tiziku
 
 %.o: %.cpp
@@ -42,7 +48,7 @@ default: tiziku
 	gcc -c $(CFLAGS) $< -o $@
 
 tiziku: main.c $(OBJS)
-	gcc main.c -o $@ $(LDFLAGS) $(CFLAGS) $(OBJS)
+	gcc main.c -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJS) tiziku hello

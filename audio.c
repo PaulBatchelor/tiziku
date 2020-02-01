@@ -1,7 +1,13 @@
 #include <stdlib.h>
 #include <jack/jack.h>
 #include <stdio.h>
+#include <soundpipe.h>
+#include <sporth.h>
+
+#include "patchwerk.h"
 #include "audio.h"
+#include "wavout.h"
+#include "pwsporth.h"
 
 /* static void jack_shutdown (void *arg) */
 /* { */
@@ -83,4 +89,50 @@ void tz_stop_audio(tz_audio* audio)
     /* jack_client_close (audio->client[0]); */
     /* free(audio->output_port); */
     /* free(audio->client); */
+}
+
+void tz_pw_init(tz_audio *audio)
+{
+    sp_data *sp;
+    audio->patch = malloc(pw_patch_size());
+    pw_patch_init(audio->patch, 64);
+    pw_patch_alloc(audio->patch, 8, 10);
+    sp_create(&sp);
+
+    sp->sr = pw_patch_srate_get(audio->patch);
+    pw_patch_data_set(audio->patch, sp);
+}
+
+void tz_pw_del(tz_audio *audio)
+{
+    sp_data *sp;
+    sp = pw_patch_data_get(audio->patch);
+    pw_patch_destroy(audio->patch);
+    pw_patch_free_nodes(audio->patch);
+    free(audio->patch);
+    sp_destroy(&sp);
+}
+
+void tz_pw_mkpatch(tz_audio *audio)
+{
+    pw_patch *patch;
+    sp_data *sp;
+    pw_node *node;
+    pw_stack *stack;
+    wavout_d *wavout;
+    pwsporth *sporth;
+
+    patch = audio->patch;
+    stack = pw_patch_stack(patch);
+    sp = pw_patch_data_get(patch);
+
+    pw_patch_new_node(patch, &node);
+    sporth = node_pwsporth(node, sp, "drone.sp");
+
+    pw_patch_new_node(patch, &node);
+    node_wavout(sp, node, "tiziku.wav");
+    wavout = pw_node_get_data(node);
+
+    pw_cable_connect(sporth->out, wavout->in);
+    pw_stack_pop(stack, NULL);
 }
