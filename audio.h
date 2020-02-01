@@ -13,4 +13,6 @@ typedef struct {
 void tz_pw_init(tz_audio *audio);
 void tz_pw_mkpatch(tz_audio *audio);
 void tz_pw_del(tz_audio *audio);
+void tz_sporth_init(tz_audio *audio);
+void tz_sporth_del(tz_audio *audio);
 #endif

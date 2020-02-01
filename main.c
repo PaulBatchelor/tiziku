@@ -4,6 +4,9 @@
 #include <jack/jack.h>
 #include <math.h>
 #include <string.h>
+#include <stdint.h>
+#include <x264.h>
+#include <cairo/cairo.h>
 
 #include <lua.h>
 #include <lualib.h>
@@ -44,50 +47,50 @@ static tz_world *g_tz;
 /*     return 0; */
 /* } */
 
-static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
-{
-    double mx, my, t, dt;
-    int winWidth, winHeight;
-    int fbWidth, fbHeight;
-    float pxRatio;
-    int x, y;
-    float maxRad = 200;
+/* static void draw(NVGcontext *vg, GLFWwindow *window, void *ud) */
+/* { */
+/*     /\* double mx, my, t, dt; *\/ */
+/*     /\* int winWidth, winHeight; *\/ */
+/*     /\* int fbWidth, fbHeight; *\/ */
+/*     /\* float pxRatio; *\/ */
+/*     /\* int x, y; *\/ */
+/*     /\* float maxRad = 200; *\/ */
 
-    tz_world *world = ud;
+/*     /\* tz_world *world = ud; *\/ */
 
-    lua_State *L = world->L;
+/*     /\* lua_State *L = world->L; *\/ */
 
-    /* glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT); */
+/*     /\* glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT); *\/ */
 
-    /* NVGcolor bgcolor =  nvgRGBAf(239, 250, 180, 255); */
-    /* glfwGetCursorPos(window, &mx, &my); */
-    /* glfwGetWindowSize(window, &winWidth, &winHeight); */
-    /* glfwGetFramebufferSize(window, &fbWidth, &fbHeight); */
-    /* pxRatio = (float)fbWidth / (float)winWidth; */
+/*     /\* NVGcolor bgcolor =  nvgRGBAf(239, 250, 180, 255); *\/ */
+/*     /\* glfwGetCursorPos(window, &mx, &my); *\/ */
+/*     /\* glfwGetWindowSize(window, &winWidth, &winHeight); *\/ */
+/*     /\* glfwGetFramebufferSize(window, &fbWidth, &fbHeight); *\/ */
+/*     /\* pxRatio = (float)fbWidth / (float)winWidth; *\/ */
 
-    /* glViewport(0, 0, fbWidth, fbHeight); */
+/*     /\* glViewport(0, 0, fbWidth, fbHeight); *\/ */
 
-    /* nvgBeginFrame(vg, winWidth, winHeight, pxRatio); */
+/*     /\* nvgBeginFrame(vg, winWidth, winHeight, pxRatio); *\/ */
 
-    /* lua_pushnumber(L, winWidth); */
-    /* lua_setglobal(L, "width"); */
-    /* lua_pushnumber(L, winHeight); */
-    /* lua_setglobal(L, "height"); */
+/*     /\* lua_pushnumber(L, winWidth); *\/ */
+/*     /\* lua_setglobal(L, "width"); *\/ */
+/*     /\* lua_pushnumber(L, winHeight); *\/ */
+/*     /\* lua_setglobal(L, "height"); *\/ */
 
-    /* lua_getglobal(L, "run"); */
-    /* lua_pcall(L, 0, 0, 0); */
+/*     /\* lua_getglobal(L, "run"); *\/ */
+/*     /\* lua_pcall(L, 0, 0, 0); *\/ */
 
-    /* nvgEndFrame(vg); */
-    /* usleep(8000); */
-    /* glfwSwapBuffers(window); */
-    /* glfwPollEvents(); */
-}
+/*     /\* nvgEndFrame(vg); *\/ */
+/*     /\* usleep(8000); *\/ */
+/*     /\* glfwSwapBuffers(window); *\/ */
+/*     /\* glfwPollEvents(); *\/ */
+/* } */
 
 static int testfunc(lua_State *L)
 {
-    int pos_x = lua_tonumber(L, 1);
-    int pos_y = lua_tonumber(L, 2);
-    float rad = lua_tonumber(L, 3);
+    /* int pos_x = lua_tonumber(L, 1); */
+    /* int pos_y = lua_tonumber(L, 2); */
+    /* float rad = lua_tonumber(L, 3); */
 
     /* NVGcontext *vg = g_tz->graphics.vg; */
     /* nvgBeginPath(vg); */
@@ -99,10 +102,10 @@ static int testfunc(lua_State *L)
 
 static int rect(lua_State *L)
 {
-    float x1 = lua_tonumber(L, 1);
-    float y1 = lua_tonumber(L, 2);
-    float x2 = lua_tonumber(L, 3);
-    float y2 = lua_tonumber(L, 4);
+    /* float x1 = lua_tonumber(L, 1); */
+    /* float y1 = lua_tonumber(L, 2); */
+    /* float x2 = lua_tonumber(L, 3); */
+    /* float y2 = lua_tonumber(L, 4); */
 
     /* NVGcontext *vg = g_tz->graphics.vg; */
     /* float *rgb = g_tz->graphics.rgb; */
@@ -121,26 +124,26 @@ static int rect(lua_State *L)
 
 static int setrgba(lua_State *L)
 {
-    float r = lua_tonumber(L, 1);
-    float g = lua_tonumber(L, 2);
-    float b = lua_tonumber(L, 3);
-    float a = lua_tonumber(L, 4);
+    /* float r = lua_tonumber(L, 1); */
+    /* float g = lua_tonumber(L, 2); */
+    /* float b = lua_tonumber(L, 3); */
+    /* float a = lua_tonumber(L, 4); */
 
-    float *rgb = g_tz->graphics.rgb;
+    /* float *rgb = g_tz->graphics.rgb; */
 
-    rgb[0] = r;
-    rgb[1] = g;
-    rgb[2] = b;
-    rgb[3] = a;
+    /* rgb[0] = r; */
+    /* rgb[1] = g; */
+    /* rgb[2] = b; */
+    /* rgb[3] = a; */
 
     return 0;
 }
 
 static int get_chan(lua_State *L)
 {
-    int pos = lua_tonumber(L, 1);
-    float *stack = g_tz->cw.stack;
-    lua_pushnumber(L, stack[pos]);
+    /* int pos = lua_tonumber(L, 1); */
+    /* float *stack = g_tz->cw.stack; */
+    /* lua_pushnumber(L, stack[pos]); */
     return 1;
 }
 
@@ -191,12 +194,14 @@ int main()
     /* tz_stop_audio(&world.audio); */
     /* tz_stop_graphics(&world.graphics); */
     /* chuckwrap_destroy(cw); */
+    tz_sporth_init(&world.audio);
     tz_pw_mkpatch(&world.audio);
 
-    for(i = 0; i < 44100 * 10; i++) {
+    for(i = 0; i < 44100 * 60; i++) {
         pw_patch_tick(world.audio.patch);
     }
 
+    tz_sporth_del(&world.audio);
     tz_pw_del(&world.audio);
 
     lua_close(L);

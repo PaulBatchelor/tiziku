@@ -14,6 +14,8 @@
 /*     exit (1); */
 /* } */
 
+void node_chooser(pw_node *node, plumber_data *pd);
+
 void tz_run_audio(tz_audio *audio, void *ud, int (*callback)(jack_nframes_t, void *))
 {
     /* const char *client_name = "tiziku"; */
@@ -113,6 +115,30 @@ void tz_pw_del(tz_audio *audio)
     sp_destroy(&sp);
 }
 
+plumber_data the_pd;
+
+void tz_sporth_init(tz_audio *audio)
+{
+    plumber_data *pd;
+    sp_data *sp;
+
+    pd = &the_pd;
+    sp = pw_patch_data_get(audio->patch);
+
+    plumber_register(pd);
+    plumber_init(pd);
+    pd->sp = sp;
+    plumber_open_file(pd, "drone.sp");
+    plumber_parse(pd);
+    plumber_compute(pd, PLUMBER_INIT);
+    plumber_close_file(pd);
+}
+
+void tz_sporth_del(tz_audio *audio)
+{
+    plumber_clean(&the_pd);
+}
+
 void tz_pw_mkpatch(tz_audio *audio)
 {
     pw_patch *patch;
@@ -127,7 +153,11 @@ void tz_pw_mkpatch(tz_audio *audio)
     sp = pw_patch_data_get(patch);
 
     pw_patch_new_node(patch, &node);
-    sporth = node_pwsporth(node, sp, "drone.sp");
+
+    node_chooser(node, &the_pd);
+
+    pw_patch_new_node(patch, &node);
+    sporth = node_pwsporth(node, &the_pd);
 
     pw_patch_new_node(patch, &node);
     node_wavout(sp, node, "tiziku.wav");

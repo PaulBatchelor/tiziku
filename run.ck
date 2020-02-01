@@ -24,14 +24,14 @@ filt[3].gain(0.9);
 filt[3].Q(40);
 
 s.parse(
-"_tk var tick _tk set " + 
-"0 4 pset " + 
-"'orch' 'orch.wav' loadfile " + 
-"'scl' '12 7 4 11 7 4 2' gen_vals " + 
+"_tk var tick _tk set " +
+"0 4 pset " +
+"'orch' 'orch.wav' loadfile " +
+"'scl' '12 7 4 11 7 4 2' gen_vals " +
 "50 '+2(++)+++----' prop 0.8 maytrig _tk get + dup 0.02 0.1 1.3 tenv " +
 "swap 0 'scl' tseq 45 + mtof 0.001 port 0.3 1 1.002 1.1 fm * 100 buthp " +
 // key Fades
-"_tk get 0.001 30 1 expon * " + 
+"_tk get 0.001 30 1 expon * " +
 "dup 0.5 * 4 p + 4 pset " +
 "0 'orch' tbldur 7 randi 0.3 1 sine 0 'orch' tbldur biscale 0 1 0.05 randi cf 0 0.05 0.2 randi 4 2048 'orch' mincer 1000 butlp " +
 "dup 0.5 * 4 p + 4 pset + " +
@@ -62,7 +62,7 @@ fun int tick(int val)
 0 => int have_color;
 
 
-fun void glitch(int num, int min) 
+fun void glitch(int num, int min)
 {
     0 => int blink;
 
@@ -75,7 +75,7 @@ fun void glitch(int num, int min)
     }
 }
 
-fun void glitchoff(int num) 
+fun void glitchoff(int num)
 {
     0 => int blink;
 
@@ -84,7 +84,7 @@ fun void glitchoff(int num)
     repeat(2 * Std.rand2(2, 8) + 1) {
         tick(blink) => blink;
         Tiziku.set(num + 1, blink);
-        if(have_color != 0) { 
+        if(have_color != 0) {
             1 => imp[num].next;
         }
         prev + Std.rand2(10, 60) => prev;
@@ -92,7 +92,7 @@ fun void glitchoff(int num)
     }
 }
 
-fun void autoglitch(int num) 
+fun void autoglitch(int num)
 {
     while(is_running) {
         Std.rand2f(5, 30)::second => now;
@@ -100,7 +100,7 @@ fun void autoglitch(int num)
     }
 
 }
-fun void autorun() 
+fun void autorun()
 {
     <<< "FADE IN", fade_out>>>;
     spork ~ autoglitch(0);
@@ -178,7 +178,7 @@ fun void run() {
                 }
 
             }
-            
+
             me.yield();
         }
     }

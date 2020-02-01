@@ -25,8 +25,8 @@ trig = -1
 Square = {}
 
 function Square:new()
-    o = { 
-        pos = 0, 
+    o = {
+        pos = 0,
         ppos = 0,
         width = 0.25,
         pwidth = 0.25,
@@ -69,7 +69,7 @@ function Square:draw()
     r = cs_b * self.clr[1] + cs * self.pclr[1]
     g = cs_b * self.clr[2] + cs * self.pclr[2]
     b = cs_b * self.clr[3] + cs * self.pclr[3]
-    a = cs_b * self.clr[4] + cs * self.pclr[4] 
+    a = cs_b * self.clr[4] + cs * self.pclr[4]
 
     self.ppos = my_pos
     self.pwidth = my_width
@@ -79,15 +79,15 @@ function Square:draw()
     self.pclr[3] = b
     self.pclr[4] = a
 
-    if self.blnk == 0 then 
+    if self.blnk == 0 then
         rgba(r, g, b, a)
     else
         rgba(0, 0, 0, a)
     end
     rect(
-    math.ceil(width * my_pos + 0.5), 
-    0, 
-    math.ceil(width * my_width + 0.5), 
+    math.ceil(width * my_pos + 0.5),
+    0,
+    math.ceil(width * my_width + 0.5),
     height)
 end
 
@@ -111,10 +111,10 @@ for i = 1, nsquares do
     s[i]:initcolor({0, 0, 0})
     color = math.random(4)
     --s[i]:newcolor(colors[color])
-    if i == 1 then 
+    if i == 1 then
         s[i].pos = 0
         s[i].ppos = 0
-    else 
+    else
         s[i].pos = cpos + scale * sizes[1][i - 1]
         s[i].ppos = s[i].pos
         cpos = cpos + scale * sizes[1][i - 1]
@@ -149,17 +149,17 @@ function run()
         if(trig ~= prev and prev ~= -1) then
             color = math.random(5)
             s[i]:newcolor(colors[color])
-            if i == 1 then 
+            if i == 1 then
                 s[i].pos = 0
-            else 
+            else
                 s[i].pos = cpos + scale * sizes[prop][i - 1]
                 cpos = cpos + scale * sizes[prop][i - 1]
             end
             s[i].width = scale * sizes[prop][i]
-        end 
+        end
         s[i].blnk = get_chan(i)
         s[i]:draw()
-        
+
     end
     prev = trig
     pfade = fade

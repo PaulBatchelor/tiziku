@@ -35,9 +35,7 @@ CFLAGS += -Ilib/patchwerk
 
 LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile
 
-OBJS += wavout.o
-
-OBJS += pwsporth.o
+OBJS += wavout.o pwsporth.o chooser.o reg.o
 
 default: tiziku
 
