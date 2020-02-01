@@ -17,8 +17,13 @@
 #include "audio.h"
 #include "graphics.h"
 #include "world.h"
+#include "reg.h"
 
-static tz_world *g_tz;
+#define WIDTH 640
+#define HEIGHT 480
+#define FPS 25
+
+static tz_world *g_tz = NULL;
 
 /* static int jack_cb(jack_nframes_t nframes, void *arg) */
 /* { */
@@ -86,6 +91,13 @@ static tz_world *g_tz;
 /*     /\* glfwPollEvents(); *\/ */
 /* } */
 
+static void draw(tz_graphics *tz, lua_State *L)
+{
+    lua_getglobal(L, "run");
+    lua_pcall(L, 0, 0, 0);
+    tz_gfx_append(tz);
+}
+
 static int testfunc(lua_State *L)
 {
     /* int pos_x = lua_tonumber(L, 1); */
@@ -102,17 +114,35 @@ static int testfunc(lua_State *L)
 
 static int rect(lua_State *L)
 {
-    /* float x1 = lua_tonumber(L, 1); */
-    /* float y1 = lua_tonumber(L, 2); */
-    /* float x2 = lua_tonumber(L, 3); */
-    /* float y2 = lua_tonumber(L, 4); */
+    float x1 = lua_tonumber(L, 1);
+    float y1 = lua_tonumber(L, 2);
+    float w = lua_tonumber(L, 3);
+    float h = lua_tonumber(L, 4);
+    uint32_t clr;
+    int x, y;
 
     /* NVGcontext *vg = g_tz->graphics.vg; */
-    /* float *rgb = g_tz->graphics.rgb; */
-    /* unsigned char r = rgb[0]; */
-    /* unsigned char g = rgb[1]; */
-    /* unsigned char b = rgb[2]; */
+    cairo_t *cr = g_tz->graphics.cr;
+    float *rgb = g_tz->graphics.rgb;
+    unsigned char r = rgb[0];
+    unsigned char g = rgb[1];
+    unsigned char b = rgb[2];
     /* unsigned char a = rgb[3]; */
+
+    cairo_set_source_rgb(cr, r/255.0, g/255.0, b/255.0);
+    cairo_rectangle(cr, x1, y1, w, h);
+    cairo_fill(cr);
+    /* uint32_t *buf = g_tz->graphics.cairo_buf; */
+
+    /* for (y = y1; y < y1 + h; y++) { */
+    /*     for (x = x1; x < x1 + w; x++) { */
+    /*         clr = 0; */
+    /*         clr = b; */
+    /*         clr |= (g << 8); */
+    /*         clr |= (r << 16); */
+    /*         buf[y * g_tz->graphics.width + x] = clr; */
+    /*     } */
+    /* } */
 
     /* nvgBeginPath(vg); */
     /* nvgRect(vg, x1, y1, x2, y2); */
@@ -122,28 +152,33 @@ static int rect(lua_State *L)
     return 0;
 }
 
+
 static int setrgba(lua_State *L)
 {
-    /* float r = lua_tonumber(L, 1); */
-    /* float g = lua_tonumber(L, 2); */
-    /* float b = lua_tonumber(L, 3); */
-    /* float a = lua_tonumber(L, 4); */
+    float r;
+    float g;
+    float b;
+    float a;
 
-    /* float *rgb = g_tz->graphics.rgb; */
+    r = lua_tonumber(L, 1);
+    g = lua_tonumber(L, 2);
+    b = lua_tonumber(L, 3);
+    a = lua_tonumber(L, 4);
 
-    /* rgb[0] = r; */
-    /* rgb[1] = g; */
-    /* rgb[2] = b; */
-    /* rgb[3] = a; */
+    float *rgb = g_tz->graphics.rgb;
+
+    rgb[0] = r;
+    rgb[1] = g;
+    rgb[2] = b;
+    rgb[3] = a;
 
     return 0;
 }
 
 static int get_chan(lua_State *L)
 {
-    /* int pos = lua_tonumber(L, 1); */
-    /* float *stack = g_tz->cw.stack; */
-    /* lua_pushnumber(L, stack[pos]); */
+    int pos = lua_tonumber(L, 1);
+    lua_pushnumber(L, reg_get(pos));
     return 1;
 }
 
@@ -156,7 +191,9 @@ static int my_rand(lua_State *L)
 int main()
 {
     tz_world world;
-    long i;
+    int i;
+    int spf;
+    long f;
 
     g_tz = &world;
     world.L = luaL_newstate();
@@ -181,6 +218,11 @@ int main()
     lua_register(L, "get_chan", get_chan);
     lua_register(L, "rand", my_rand);
 
+    lua_pushnumber(L, WIDTH);
+    lua_setglobal(L, "width");
+    lua_pushnumber(L, HEIGHT);
+    lua_setglobal(L, "height");
+
     if(luaL_loadfile(L, "run.lua") || lua_pcall(L, 0, 0, 0))
         fprintf(stderr, "cannot run file %s", lua_tostring(L, -1));
 
@@ -196,13 +238,21 @@ int main()
     /* chuckwrap_destroy(cw); */
     tz_sporth_init(&world.audio);
     tz_pw_mkpatch(&world.audio);
+    tz_gfx_init(&world.graphics, WIDTH, HEIGHT, FPS);
 
-    for(i = 0; i < 44100 * 60; i++) {
-        pw_patch_tick(world.audio.patch);
+    spf = 44100 / FPS; /* 1470 if FPS is 30 */
+
+    for (f = 0; f < 30 * 60; f++) {
+        draw(&world.graphics, world.L);
+        printf("Frame: %ld\n", f);
+        for (i = 0; i < spf; i++) {
+            pw_patch_tick(world.audio.patch);
+        }
     }
 
     tz_sporth_del(&world.audio);
     tz_pw_del(&world.audio);
+    tz_gfx_del(&world.graphics);
 
     lua_close(L);
     return 0;

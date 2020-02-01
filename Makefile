@@ -32,8 +32,9 @@ CFLAGS+=-I$(LUA_PATH)
 
 OBJS += lib/patchwerk/patchwerk.o
 CFLAGS += -Ilib/patchwerk
+CFLAGS += -g
 
-LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile
+LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile -lcairo -lx264
 
 OBJS += wavout.o pwsporth.o chooser.o reg.o
 
@@ -47,6 +48,19 @@ default: tiziku
 
 tiziku: main.c $(OBJS)
 	gcc main.c -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
+
+
+NAME=tiziku
+
+$(NAME).mp3: $(NAME).wav
+	lame --preset studio $<
+
+$(NAME).mp4: $(NAME).h264 $(NAME).mp3
+	ffmpeg -y -i $(NAME).mp3 -i $(NAME).h264 -ac 2 $(NAME).mp4
+
+vid: tiziku
+	./tiziku
+	$(MAKE) $(NAME).mp4
 
 clean:
 	rm -rf $(OBJS) tiziku hello

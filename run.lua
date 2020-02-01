@@ -30,7 +30,7 @@ function Square:new()
         ppos = 0,
         width = 0.25,
         pwidth = 0.25,
-        cs = 0.991,
+        cs = 0.97,
         blnk = 0
     }
     setmetatable(o, self)
@@ -124,6 +124,7 @@ end
 
 clock = 0
 pfade = -1
+
 function run()
     trig = get_chan(0)
     cpos = 0
