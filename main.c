@@ -18,25 +18,27 @@ static tz_world *g_tz;
 
 static int jack_cb(jack_nframes_t nframes, void *arg)
 {
-    int i, chan;
-    tz_world *world = arg;
-    tz_audio *audio = &world->audio;
-    jack_default_audio_sample_t  *out[audio->nchan];
+    /* int i, chan; */
+    /* tz_world *world = arg; */
+    /* tz_audio *audio = &world->audio; */
+    /* jack_default_audio_sample_t  *out[audio->nchan]; */
 
-    float buf[nframes * 2];
-    memset(buf, 0, sizeof(float) * nframes * 2); 
+    /* float buf[nframes * 2]; */
+    /* memset(buf, 0, sizeof(float) * nframes * 2);  */
 
 
-    for(chan = 0; chan < audio->nchan; chan++) {
-        out[chan] = jack_port_get_buffer (audio->output_port[chan], nframes);
-    }
+    /* for(chan = 0; chan < audio->nchan; chan++) { */
+    /*     out[chan] = jack_port_get_buffer (audio->output_port[chan], nframes); */
+    /* } */
 
-    int bufcount = 0; 
-    chuckwrap_compute(&world->cw, buf, nframes);
-    for(i = 0; i < nframes; i++) {
-        out[0][i] = buf[bufcount++];
-        out[1][i] = buf[bufcount++];
-    }
+    /* int bufcount = 0; */
+    /* chuckwrap_compute(&world->cw, buf, nframes); */
+    /* for(i = 0; i < nframes; i++) { */
+    /*     /\* out[0][i] = buf[bufcount++]; *\/ */
+    /*     /\* out[1][i] = buf[bufcount++]; *\/ */
+    /*     out[0][i] = 0; */
+    /*     out[1][i] = 0; */
+    /* } */
 
     return 0;
 }
@@ -54,30 +56,30 @@ static void draw(NVGcontext *vg, GLFWwindow *window, void *ud)
 
     lua_State *L = world->L;
 
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+    /* glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT); */
 
-    NVGcolor bgcolor =  nvgRGBAf(239, 250, 180, 255);
-    glfwGetCursorPos(window, &mx, &my);
-    glfwGetWindowSize(window, &winWidth, &winHeight);
-    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-    pxRatio = (float)fbWidth / (float)winWidth;
+    /* NVGcolor bgcolor =  nvgRGBAf(239, 250, 180, 255); */
+    /* glfwGetCursorPos(window, &mx, &my); */
+    /* glfwGetWindowSize(window, &winWidth, &winHeight); */
+    /* glfwGetFramebufferSize(window, &fbWidth, &fbHeight); */
+    /* pxRatio = (float)fbWidth / (float)winWidth; */
 
-    glViewport(0, 0, fbWidth, fbHeight);
+    /* glViewport(0, 0, fbWidth, fbHeight); */
 
-    nvgBeginFrame(vg, winWidth, winHeight, pxRatio);
+    /* nvgBeginFrame(vg, winWidth, winHeight, pxRatio); */
 
-    lua_pushnumber(L, winWidth);
-    lua_setglobal(L, "width");
-    lua_pushnumber(L, winHeight);
-    lua_setglobal(L, "height");
+    /* lua_pushnumber(L, winWidth); */
+    /* lua_setglobal(L, "width"); */
+    /* lua_pushnumber(L, winHeight); */
+    /* lua_setglobal(L, "height"); */
 
-    lua_getglobal(L, "run");
-    lua_pcall(L, 0, 0, 0);
+    /* lua_getglobal(L, "run"); */
+    /* lua_pcall(L, 0, 0, 0); */
 
-    nvgEndFrame(vg);
-    usleep(8000);
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    /* nvgEndFrame(vg); */
+    /* usleep(8000); */
+    /* glfwSwapBuffers(window); */
+    /* glfwPollEvents(); */
 }
 
 static int testfunc(lua_State *L)
@@ -86,11 +88,11 @@ static int testfunc(lua_State *L)
     int pos_y = lua_tonumber(L, 2);
     float rad = lua_tonumber(L, 3);
 
-    NVGcontext *vg = g_tz->graphics.vg;
-    nvgBeginPath(vg);
-    nvgArc(vg, pos_x, pos_y, rad, 0, 2 * M_PI, NVG_CCW);
-    nvgFillColor(vg, nvgRGBA(245, 105, 145, 128));
-    nvgFill(vg);
+    /* NVGcontext *vg = g_tz->graphics.vg; */
+    /* nvgBeginPath(vg); */
+    /* nvgArc(vg, pos_x, pos_y, rad, 0, 2 * M_PI, NVG_CCW); */
+    /* nvgFillColor(vg, nvgRGBA(245, 105, 145, 128)); */
+    /* nvgFill(vg); */
     return 0;
 }
 
@@ -101,17 +103,17 @@ static int rect(lua_State *L)
     float x2 = lua_tonumber(L, 3);
     float y2 = lua_tonumber(L, 4);
 
-    NVGcontext *vg = g_tz->graphics.vg;
-    float *rgb = g_tz->graphics.rgb;
-    unsigned char r = rgb[0];
-    unsigned char g = rgb[1];
-    unsigned char b = rgb[2];
-    unsigned char a = rgb[3];
+    /* NVGcontext *vg = g_tz->graphics.vg; */
+    /* float *rgb = g_tz->graphics.rgb; */
+    /* unsigned char r = rgb[0]; */
+    /* unsigned char g = rgb[1]; */
+    /* unsigned char b = rgb[2]; */
+    /* unsigned char a = rgb[3]; */
 
-    nvgBeginPath(vg);
-    nvgRect(vg, x1, y1, x2, y2);
-    nvgFillColor(vg, nvgRGBA(r, g, b, a));
-    nvgFill(vg);
+    /* nvgBeginPath(vg); */
+    /* nvgRect(vg, x1, y1, x2, y2); */
+    /* nvgFillColor(vg, nvgRGBA(r, g, b, a)); */
+    /* nvgFill(vg); */
 
     return 0;
 }
@@ -177,14 +179,14 @@ int main()
     if(luaL_loadfile(L, "run.lua") || lua_pcall(L, 0, 0, 0))
         fprintf(stderr, "cannot run file %s", lua_tostring(L, -1));
 
-    the_chuckwrap *cw = &world.cw;
-    chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT);
-    chuckwrap_compile(cw, "run.ck");
+    /* the_chuckwrap *cw = &world.cw; */
+    /* chuckwrap_init(cw, MY_SRATE, MY_BUFFERSIZE, MY_CHANNELS_IN, MY_CHANNELS_OUT); */
+    /* chuckwrap_compile(cw, "run.ck"); */
     tz_run_audio(&world.audio, &world, jack_cb);
     tz_run_graphics(&world.graphics, draw, &world);
     tz_stop_audio(&world.audio);
     tz_stop_graphics(&world.graphics);
-    chuckwrap_destroy(cw);
+    /* chuckwrap_destroy(cw); */
 
     lua_close(L);
     return 0;
