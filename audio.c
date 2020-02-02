@@ -8,6 +8,8 @@
 #include "audio.h"
 #include "wavout.h"
 #include "pwsporth.h"
+#include "glitch.h"
+#include "add.h"
 
 /* static void jack_shutdown (void *arg) */
 /* { */
@@ -147,22 +149,90 @@ void tz_pw_mkpatch(tz_audio *audio)
     pw_stack *stack;
     wavout_d *wavout;
     pwsporth *sporth;
+    add_d *adder[2];
+    glitch_d *glitch[4];
 
     patch = audio->patch;
     stack = pw_patch_stack(patch);
     sp = pw_patch_data_get(patch);
 
+    /* create chooser (no outputs/inputs) */
     pw_patch_new_node(patch, &node);
-
     node_chooser(node, &the_pd);
 
+    /* glitch 0 */
+    pw_patch_new_node(patch, &node);
+    glitch[0] = node_glitch(node, 0);
+
+    /* glitch 1 */
+    pw_patch_new_node(patch, &node);
+    glitch[1] = node_glitch(node, 1);
+
+
+    /* glitch0 + glitch 1 -> add0 */
+    pw_stack_pop(stack, NULL);
+    pw_stack_pop(stack, NULL);
+    pw_patch_new_node(patch, &node);
+    node_add(node);
+    pw_node_setup(node);
+    adder[0] = pw_node_get_data(node);
+    pw_cable_connect(glitch[0]->out, adder[0]->in1);
+    pw_cable_connect(glitch[1]->out, adder[0]->in2);
+
+
+    /* glitch2 */
+    pw_patch_new_node(patch, &node);
+    glitch[2] = node_glitch(node, 2);
+
+
+    /* add0 + glitch2 -> add1*/
+    pw_stack_pop(stack, NULL);
+    pw_stack_pop(stack, NULL);
+    pw_patch_new_node(patch, &node);
+    node_add(node);
+    pw_node_setup(node);
+    adder[1] = pw_node_get_data(node);
+    pw_cable_connect(adder[0]->out, adder[1]->in1);
+    pw_cable_connect(glitch[2]->out, adder[1]->in2);
+
+
+    /* glitch3 */
+    pw_patch_new_node(patch, &node);
+    glitch[3] = node_glitch(node, 3);
+
+    /* add1 + glitch3 -> add0 */
+    pw_stack_pop(stack, NULL);
+    pw_stack_pop(stack, NULL);
+    pw_patch_new_node(patch, &node);
+    node_add(node);
+    pw_node_setup(node);
+    adder[0] = pw_node_get_data(node);
+    pw_cable_connect(adder[1]->out, adder[0]->in1);
+    pw_cable_connect(glitch[3]->out, adder[0]->in2);
+
+
+    /* sporth patch */
     pw_patch_new_node(patch, &node);
     sporth = node_pwsporth(node, &the_pd);
 
+
+    /* add0 + sporth -> add1 */
+    pw_stack_pop(stack, NULL);
+    pw_stack_pop(stack, NULL);
+    pw_patch_new_node(patch, &node);
+    node_add(node);
+    pw_node_setup(node);
+    adder[1] = pw_node_get_data(node);
+
+    pw_cable_connect(adder[0]->out, adder[1]->in2);
+    pw_cable_connect(sporth->out, adder[1]->in1);
+
+    /* add1 -> wavout */
+    pw_stack_pop(stack, NULL);
     pw_patch_new_node(patch, &node);
     node_wavout(sp, node, "tiziku.wav");
     wavout = pw_node_get_data(node);
 
-    pw_cable_connect(sporth->out, wavout->in);
+    pw_cable_connect(adder[1]->out, wavout->in);
     pw_stack_pop(stack, NULL);
 }

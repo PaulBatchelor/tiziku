@@ -36,7 +36,7 @@ CFLAGS += -g
 
 LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile -lcairo -lx264
 
-OBJS += wavout.o pwsporth.o chooser.o reg.o
+OBJS += wavout.o pwsporth.o chooser.o reg.o glitch.o add.o
 
 default: tiziku
 

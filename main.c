@@ -118,8 +118,8 @@ static int rect(lua_State *L)
     float y1 = lua_tonumber(L, 2);
     float w = lua_tonumber(L, 3);
     float h = lua_tonumber(L, 4);
-    uint32_t clr;
-    int x, y;
+    /* uint32_t clr; */
+    /* int x, y; */
 
     /* NVGcontext *vg = g_tz->graphics.vg; */
     cairo_t *cr = g_tz->graphics.cr;
@@ -241,10 +241,10 @@ int main()
     tz_gfx_init(&world.graphics, WIDTH, HEIGHT, FPS);
 
     spf = 44100 / FPS; /* 1470 if FPS is 30 */
-
-    for (f = 0; f < 30 * 60; f++) {
+    long total = 30 * 60;
+    for (f = 0; f < total; f++) {
         draw(&world.graphics, world.L);
-        printf("Frame: %ld\n", f);
+        printf("frame %ld of %ld\n", f, total);
         for (i = 0; i < spf; i++) {
             pw_patch_tick(world.audio.patch);
         }
