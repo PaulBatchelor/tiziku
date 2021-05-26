@@ -32,6 +32,7 @@ CFLAGS+=-I$(LUA_PATH)
 
 OBJS += lib/patchwerk/patchwerk.o
 CFLAGS += -Ilib/patchwerk
+CFLAGS += -I/usr/local/include
 CFLAGS += -g
 
 LDFLAGS += -lsporth -lsoundpipe -lm -lsndfile -lcairo -lx264
@@ -44,10 +45,10 @@ default: tiziku
 	g++ -c $(CXXFLAGS) $< -o $@
 
 %.o: %.c
-	gcc -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 tiziku: main.c $(OBJS)
-	gcc main.c -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
+	$(CC) main.c -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 
 
 NAME=tiziku
