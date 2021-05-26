@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <jack/jack.h>
+/* #include <jack/jack.h> */
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
@@ -241,7 +241,7 @@ int main()
     tz_gfx_init(&world.graphics, WIDTH, HEIGHT, FPS);
 
     spf = 44100 / FPS; /* 1470 if FPS is 30 */
-    long total = 30 * 60;
+    long total = FPS * 60 * 10; /* 10 Minutes */
     for (f = 0; f < total; f++) {
         draw(&world.graphics, world.L);
         printf("frame %ld of %ld\n", f, total);
