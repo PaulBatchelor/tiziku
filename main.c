@@ -244,7 +244,9 @@ int main()
     long total = FPS * 60 * 10; /* 10 Minutes */
     for (f = 0; f < total; f++) {
         draw(&world.graphics, world.L);
-        printf("frame %ld of %ld\n", f, total);
+        if ((f % FPS) == 0) {
+            printf("frame %ld of %ld\n", f, total);
+        }
         for (i = 0; i < spf; i++) {
             pw_patch_tick(world.audio.patch);
         }
