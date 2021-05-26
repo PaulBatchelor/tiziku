@@ -123,6 +123,7 @@ void tz_sporth_init(tz_audio *audio)
 {
     plumber_data *pd;
     sp_data *sp;
+    int rc;
 
     pd = &the_pd;
     sp = pw_patch_data_get(audio->patch);
@@ -131,7 +132,11 @@ void tz_sporth_init(tz_audio *audio)
     plumber_init(pd);
     pd->sp = sp;
     plumber_open_file(pd, "drone.sp");
-    plumber_parse(pd);
+    rc = plumber_parse(pd);
+
+    if (rc != PLUMBER_OK) {
+        exit(1);
+    }
     plumber_compute(pd, PLUMBER_INIT);
     plumber_close_file(pd);
 }
